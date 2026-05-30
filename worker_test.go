@@ -7,20 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rafaeljusto/redigomock/v3"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestWorkerBasics(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	job2 := "job2"
 	job3 := "job3"
 
-	cleanKeyspace(ns, pool)
 
 	var arg1 float64
 	var arg2 float64
@@ -91,8 +89,8 @@ func TestWorkerBasics(t *testing.T) {
 }
 
 func TestWorkerInProgress(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	deleteQueue(pool, ns, job1)
 	deleteRetryAndDead(pool, ns)
@@ -144,8 +142,8 @@ func TestWorkerInProgress(t *testing.T) {
 }
 
 func TestWorkerRetry(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	deleteQueue(pool, ns, job1)
 	deleteRetryAndDead(pool, ns)
@@ -191,8 +189,8 @@ func TestWorkerRetry(t *testing.T) {
 
 // Check if a custom backoff function functions functionally.
 func TestWorkerRetryWithCustomBackoff(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	deleteQueue(pool, ns, job1)
 	deleteRetryAndDead(pool, ns)
@@ -241,8 +239,8 @@ func TestWorkerRetryWithCustomBackoff(t *testing.T) {
 }
 
 func TestWorkerDead(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	job2 := "job2"
 	deleteQueue(pool, ns, job1)
@@ -304,8 +302,8 @@ func TestWorkerDead(t *testing.T) {
 }
 
 func TestWorkersPaused(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
+
 	job1 := "job1"
 	deleteQueue(pool, ns, job1)
 	deleteRetryAndDead(pool, ns)
@@ -379,9 +377,9 @@ func TestStopWithUnavailableRedis(t *testing.T) {
 }
 
 func TestStop(t *testing.T) {
-	redisPool := newTestPool(t)
+	namespace, redisPool := setupTestContext(t)
 
-	namespace := "work"
+
 	wp := NewWorkerPool(TestContext{}, 10, namespace, redisPool)
 	wp.Start()
 	wp.Stop()
@@ -398,9 +396,9 @@ func TestStop(t *testing.T) {
 }
 
 func TestStopCleanup(t *testing.T) {
-	redisPool := newTestPool(t)
+	namespace, redisPool := setupTestContext(t)
 
-	namespace := "work"
+
 	jobType := "dummyJob"
 	jobData := `{"name":"dummyJob","id":"40a2206be652914611c777f4","t":1614838373,"args":{"key":0}}`
 
@@ -446,9 +444,8 @@ func TestStopCleanup(t *testing.T) {
 }
 
 func BenchmarkJobProcessing(b *testing.B) {
-	pool := newTestPool(b)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(b)
+
 	enqueuer := NewEnqueuer(ns, pool)
 
 	for i := 0; i < b.N; i++ {
@@ -470,23 +467,6 @@ func BenchmarkJobProcessing(b *testing.B) {
 	wp.Stop()
 }
 
-func newTestPool(t testing.TB) *redis.Pool {
-	t.Helper()
-
-	s, err := miniredis.Run()
-	assert.NoError(t, err)
-	t.Cleanup(s.Close)
-
-	return &redis.Pool{
-		MaxActive:   10,
-		MaxIdle:     10,
-		IdleTimeout: 240 * time.Second,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", s.Addr())
-		},
-		Wait: true,
-	}
-}
 
 func newMockTestPool(t testing.TB) (*redis.Pool, *redigomock.Conn) {
 	t.Helper()
@@ -693,8 +673,7 @@ type emptyCtx struct{}
 // drained before returning.
 // https://github.com/gocraft/work/issues/24
 func TestWorkerPoolStop(t *testing.T) {
-	ns := "will_it_end"
-	pool := newTestPool(t)
+	ns, pool := setupTestContext(t)
 	var started, stopped int32
 	num_iters := 30
 

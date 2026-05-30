@@ -10,9 +10,7 @@ import (
 )
 
 func TestPeriodicEnqueuer(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	var pjs []*periodicJob
 	pjs = appendPeriodicJob(pjs, "0/29 * * * * *", "foo") // Every 29 seconds
@@ -98,9 +96,7 @@ func TestPeriodicEnqueuer(t *testing.T) {
 }
 
 func TestPeriodicEnqueuerSpawn(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	pe := newPeriodicEnqueuer(ns, pool, nil)
 	pe.start()

@@ -9,10 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/gojek/work"
 	"github.com/gomodule/redigo/redis"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -27,7 +25,7 @@ type TestWebUIServerSuite struct {
 
 func (s *TestWebUIServerSuite) SetupSuite() {
 	s.pool = newTestPool(s.T())
-	s.ns = "work"
+	s.ns = "work:webui_suite"
 
 	s.server = NewServer(s.ns, s.pool, ":6666")
 	s.server.Start()
@@ -478,22 +476,6 @@ func (s *TestWebUIServerSuite) TestAssets() {
 	s.NoError(err)
 }
 
-func newTestPool(t testing.TB) *redis.Pool {
-	t.Helper()
-
-	s, err := miniredis.Run()
-	assert.NoError(t, err)
-	t.Cleanup(s.Close)
-	return &redis.Pool{
-		MaxActive:   3,
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", s.Addr())
-		},
-		Wait: true,
-	}
-}
 
 func cleanKeyspace(namespace string, pool *redis.Pool) {
 	conn := pool.Get()

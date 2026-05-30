@@ -9,8 +9,7 @@ import (
 )
 
 func TestHeartbeater(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
 
 	tMock := int64(1425263409)
 	setNowEpochSecondsMock(tMock)

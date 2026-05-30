@@ -13,9 +13,7 @@ import (
 type TestContext struct{}
 
 func TestClientWorkerPoolHeartbeats(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	wp := NewWorkerPool(TestContext{}, 10, ns, pool)
 	wp.Job("wat", func(job *Job) error { return nil })
@@ -65,9 +63,7 @@ func TestClientWorkerPoolHeartbeats(t *testing.T) {
 }
 
 func TestClientWorkerObservations(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	enqueuer := NewEnqueuer(ns, pool)
 	_, err := enqueuer.Enqueue("wat", Q{"a": 1, "b": 2})
@@ -136,9 +132,7 @@ func TestClientWorkerObservations(t *testing.T) {
 }
 
 func TestClientQueues(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	enqueuer := NewEnqueuer(ns, pool)
 	_, err := enqueuer.Enqueue("wat", nil)
@@ -206,9 +200,7 @@ func TestClientQueues(t *testing.T) {
 }
 
 func TestClientScheduledJobs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	enqueuer := NewEnqueuer(ns, pool)
 
@@ -254,9 +246,7 @@ func TestClientScheduledJobs(t *testing.T) {
 }
 
 func TestClientRetryJobs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	setNowEpochSecondsMock(1425263409)
 	defer resetNowEpochSecondsMock()
@@ -293,9 +283,7 @@ func TestClientRetryJobs(t *testing.T) {
 }
 
 func TestClientDeadJobs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	setNowEpochSecondsMock(1425263409)
 	defer resetNowEpochSecondsMock()
@@ -348,9 +336,7 @@ func TestClientDeadJobs(t *testing.T) {
 }
 
 func TestClientDeleteDeadJob(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Insert a dead job:
 	insertDeadJob(ns, pool, "wat", 12345, 12347)
@@ -377,9 +363,7 @@ func TestClientDeleteDeadJob(t *testing.T) {
 }
 
 func TestClientRetryDeadJob(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Insert a dead job:
 	insertDeadJob(ns, pool, "wat1", 12345, 12347)
@@ -433,9 +417,7 @@ func TestClientRetryDeadJob(t *testing.T) {
 }
 
 func TestClientRetryDeadJobWithArgs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Enqueue a job with arguments
 	name := "foobar"
@@ -477,9 +459,7 @@ func TestClientRetryDeadJobWithArgs(t *testing.T) {
 }
 
 func TestClientDeleteAllDeadJobs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Insert a dead job:
 	insertDeadJob(ns, pool, "wat", 12345, 12347)
@@ -503,9 +483,7 @@ func TestClientDeleteAllDeadJobs(t *testing.T) {
 }
 
 func TestClientRetryAllDeadJobs(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	setNowEpochSecondsMock(1425263409)
 	defer resetNowEpochSecondsMock()
@@ -561,9 +539,7 @@ func TestClientRetryAllDeadJobs(t *testing.T) {
 }
 
 func TestClientRetryAllDeadJobsBig(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	conn := pool.Get()
 	defer conn.Close()
@@ -630,9 +606,7 @@ func TestClientRetryAllDeadJobsBig(t *testing.T) {
 }
 
 func TestClientDeleteScheduledJob(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Delete an invalid job. Make sure we get error
 	client := NewClient(ns, pool)
@@ -651,9 +625,7 @@ func TestClientDeleteScheduledJob(t *testing.T) {
 }
 
 func TestClientDeleteScheduledUniqueJob(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	// Schedule a unique job. Delete it. Ensure we can schedule it again.
 	enq := NewEnqueuer(ns, pool)
@@ -672,9 +644,7 @@ func TestClientDeleteScheduledUniqueJob(t *testing.T) {
 }
 
 func TestClientDeleteRetryJob(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "testwork"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	setNowEpochSecondsMock(1425263409)
 	defer resetNowEpochSecondsMock()

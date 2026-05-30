@@ -9,9 +9,7 @@ import (
 )
 
 func TestDeadPoolReaper(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	conn := pool.Get()
 	defer conn.Close()
@@ -96,8 +94,7 @@ func TestDeadPoolReaper(t *testing.T) {
 }
 
 func TestDeadPoolReaperNoHeartbeat(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
 
 	conn := pool.Get()
 	defer conn.Close()
@@ -106,7 +103,6 @@ func TestDeadPoolReaperNoHeartbeat(t *testing.T) {
 
 	// Create redis data
 	var err error
-	cleanKeyspace(ns, pool)
 	err = conn.Send("SADD", workerPoolsKey, "1")
 	assert.NoError(t, err)
 	err = conn.Send("SADD", workerPoolsKey, "2")
@@ -183,9 +179,7 @@ func TestDeadPoolReaperNoHeartbeat(t *testing.T) {
 }
 
 func TestDeadPoolReaperNoJobTypes(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	conn := pool.Get()
 	defer conn.Close()
@@ -263,11 +257,9 @@ func TestDeadPoolReaperNoJobTypes(t *testing.T) {
 }
 
 func TestDeadPoolReaperWithWorkerPools(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
+	ns, pool := setupTestContext(t)
 	job1 := "job1"
 	stalePoolID := "aaa"
-	cleanKeyspace(ns, pool)
 	// test vars
 	expectedDeadTime := 5 * time.Millisecond
 
@@ -303,9 +295,7 @@ func TestDeadPoolReaperWithWorkerPools(t *testing.T) {
 }
 
 func TestDeadPoolReaperCleanStaleLocks(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	conn := pool.Get()
 	defer conn.Close()

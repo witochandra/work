@@ -27,7 +27,7 @@ type TestWebUIHandlerSuite struct {
 
 func (s *TestWebUIHandlerSuite) SetupSuite() {
 	s.pool = newTestPool(s.T())
-	s.ns = "work"
+	s.ns = "work:webui_handler"
 	s.mountPath = "/workerui"
 
 	handler := NewHandler(work.NewClient(s.ns, s.pool))

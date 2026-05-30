@@ -7,9 +7,7 @@ import (
 )
 
 func TestRequeue(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	tMock := nowEpochSeconds() - 10
 	setNowEpochSecondsMock(tMock)
@@ -50,9 +48,7 @@ func TestRequeue(t *testing.T) {
 }
 
 func TestRequeueUnknown(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 
 	tMock := nowEpochSeconds() - 10
 	setNowEpochSecondsMock(tMock)

@@ -18,9 +18,7 @@ var two = int64(2)
 var three = int64(3)
 
 func TestEnqueue(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 	job, err := enqueuer.Enqueue("wat", Q{"a": 1, "b": "cool"})
 	assert.Nil(t, err)
@@ -172,9 +170,7 @@ func TestEnqueue_WithMock(t *testing.T) {
 }
 
 func TestEnqueueIn(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	// Set to expired value to make sure we update the set of known jobs
@@ -322,9 +318,7 @@ func TestEnqueueIn_WithMock(t *testing.T) {
 }
 
 func TestEnqueueAt(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	now := time.Now().Unix()
@@ -474,9 +468,7 @@ func TestEnqueueAt_WithMock(t *testing.T) {
 }
 
 func TestEnqueueUnique(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 	var mutex = &sync.Mutex{}
 	job, err := enqueuer.EnqueueUnique("wat", Q{"a": 1, "b": "cool"})
@@ -550,9 +542,7 @@ func TestEnqueueUnique(t *testing.T) {
 }
 
 func TestBulkEnqueue(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 	results, err := enqueuer.BulkEnqueue([]BulkEnqueueParam{{
 		Name: "wat",
@@ -880,9 +870,7 @@ func TestEnqueueUnique_WithMock(t *testing.T) {
 }
 
 func TestEnqueueUniqueIn(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	// Enqueue two unique jobs -- ensure one job sticks.
@@ -1044,9 +1032,7 @@ func TestEnqueueUniqueByKey(t *testing.T) {
 	var arg3 string
 	var arg4 string
 
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 	var mutex = &sync.Mutex{}
 	job, err := enqueuer.EnqueueUniqueByKey("wat", Q{"a": 3, "b": "foo"}, Q{"key": "123"})
@@ -1248,9 +1234,7 @@ func TestEnqueueUniqueByKey_WithMock(t *testing.T) {
 }
 
 func TestEnqueueUniqueAt(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	now := time.Now().Unix()
@@ -1387,9 +1371,7 @@ func TestEnqueueUniqueAt_WithMock(t *testing.T) {
 }
 
 func TestEnqueueUniqueInByKey(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	// Enqueue two unique jobs -- ensure one job sticks.
@@ -1532,9 +1514,7 @@ func TestEnqueueUniqueInByKey_WithMock(t *testing.T) {
 }
 
 func TestEnqueueUniqueAtByKey(t *testing.T) {
-	pool := newTestPool(t)
-	ns := "work"
-	cleanKeyspace(ns, pool)
+	ns, pool := setupTestContext(t)
 	enqueuer := NewEnqueuer(ns, pool)
 
 	now := time.Now().Unix()
